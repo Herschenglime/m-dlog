@@ -1,4 +1,5 @@
 <script lang="ts">
+
   import { get } from 'svelte/store';
 
   import Card from '$lib/components/Card.svelte';
@@ -7,7 +8,7 @@
 
   import { InlineCalendar, themes as calendarThemes } from 'svelte-calendar';
   let selected: Date = new Date(new Date().toDateString());
-  $: dateString = selected.toDateString();
+  $: dateString = selected.toDateString().substring(4)
 
   let entry = { title: '', body: '', date: selected, dateString: dateString };
   $: entry.dateString = dateString;
@@ -24,26 +25,37 @@
     $dailyLogs = $dailyLogs.set(dateString, entry);
     editing = false;
   }
+
+  //getting in the example data
+  import entryValues from '$lib/data/entries.json';
+  entryValues.forEach((mockEntry, index) => {
+    $dailyLogs.set(mockEntry.title, {dateString: mockEntry.title, body: mockEntry.body, imageID:(index+1)})
+    console.log(mockEntry)
+    console.log($dailyLogs.get(mockEntry.title))
+  })
+ $dailyLogs = $dailyLogs;
+
 </script>
 
 <body>
   <h1 style:text-align="center">Calendar View</h1>
 
   <!-- <p>Selected: {selected}</p> -->
+
   {#if $dailyLogs.has(dateString)}
     <JournalEntry entry={$dailyLogs.get(dateString)} />
   {:else}
     <Card>
       {#if !editing}
-        <h2 class ="center">No entry yet for this day</h2>
-      <div class="center">
-        <button class = "buttons" on:click={() => (editing = true)}> + </button>
-      </div>
+        <h2 class="center">No entry yet for this day</h2>
+        <div class="center">
+          <button class="buttons" on:click={() => (editing = true)}> + </button>
+        </div>
       {:else}
-        <JournalEntry {entry}/>
+        <JournalEntry {entry} />
         <EntryForm bind:entry on:submit={createEntry} />
 
-        <button on:click={() => (editing = false)}> Cancel Editing</button>
+        <button on:click={() => (editing = false)}>Cancel Editing</button>
       {/if}
     </Card>
   {/if}
@@ -74,9 +86,9 @@
     border-radius: 10px;
     overflow: hidden;
   }
-  .center{
+  .center {
     text-align: center;
-    font-family: "Proxima Nova";
+    font-family: 'Proxima Nova';
   }
   .buttons {
     display: inline-block;
